@@ -71,13 +71,43 @@ namespace MazeSolver
             return false;
         }
 
+        public void RenderMaze(Maze maze)
+        {
+            for (int y = 0; y < maze.Dimensions.Y; y++)
+            {
+                for (int x = 0; x < maze.Dimensions.X; x++)
+                {
+                    switch(maze.Map[x,y])
+                    {
+                        case "X":
+                            Console.ForegroundColor = ConsoleColor.Cyan;
+                            break;
+                        case "#":
+                            Console.ForegroundColor = ConsoleColor.DarkRed;
+                            break;
+                        default:
+                            Console.ForegroundColor = ConsoleColor.White;
+                            break;
+                            
+
+                    }
+                    Console.Write(maze.Map[x, y]);
+                }
+                Console.WriteLine("");
+            
+            }
+            Console.WriteLine("");
+
+        }
+
         public void SolveMaze(string filename)
         {
             Maze maze = ParseFile(filename);
 
             Point curPoint = maze.Start;
 
-            List<Point> decisionPoints = new List<Point>();
+            Stack<Point> decisionPoints = new Stack<Point>();
+            Stack<Point> path = new Stack<Point>();
             while (true)
             {
 
@@ -85,6 +115,26 @@ namespace MazeSolver
                 bool canMoveDown = CanMove(curPoint, maze, 0, 1);
                 bool canMoveLeft = CanMove(curPoint, maze, -1);
                 bool canMoveUp = CanMove(curPoint, maze, 0, -1);
+
+                if ((canMoveRight ? 1 : 0) + (canMoveDown ? 1 : 0) +
+                   (canMoveLeft ? 1 : 0) + (canMoveUp ? 1 : 0) > 1)
+                {
+                    decisionPoints.Push(new Point() { X = curPoint.X, Y = curPoint.Y });
+                }
+
+                if (!canMoveRight && !canMoveDown && !canMoveLeft && !canMoveUp)
+                {
+                    Point lastDecisionPoint = decisionPoints.Pop();
+                    
+                    while (!(curPoint.X == lastDecisionPoint.X && curPoint.Y == lastDecisionPoint.Y))
+                    {
+                        curPoint = path.Pop();
+                        maze.Map[curPoint.X, curPoint.Y] = ".";
+                    }
+                    continue;
+                }
+
+                path.Push(new Point() { X = curPoint.X, Y = curPoint.Y });
 
                 if (canMoveRight)
                     curPoint.X++;
@@ -94,9 +144,12 @@ namespace MazeSolver
                     curPoint.X--;
                 else if (canMoveUp)
                     curPoint.Y--;
-
+                RenderMaze(maze);
                 if (maze.Map[curPoint.X, curPoint.Y] == "E")
                     break;
+                maze.Map[curPoint.X, curPoint.Y] = "X";
+
+          
 
             }
 
@@ -112,9 +165,9 @@ namespace MazeSolver
         static void Main(string[] args)
         {
             MazeSolver mazeSolver = new MazeSolver();
-            mazeSolver.SolveMaze("Mazes/input.txt");
+            mazeSolver.SolveMaze("Mazes/medium_input.txt");
 
-
+            while (true) { }
 
 
         }
@@ -136,5 +189,8 @@ namespace MazeSolver
             this.v1 = Int32.Parse(v1);
             this.v2 = Int32.Parse(v2);
         }
+        public Point() { }
+
+
     }
 }
