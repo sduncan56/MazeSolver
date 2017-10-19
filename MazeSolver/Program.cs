@@ -60,6 +60,7 @@ namespace MazeSolver
         public bool CanMove(Point curPoint, Maze maze, int xDir = 0, int yDir = 0)
         {
             string character = "";
+            //Could/should check if it's in bounds here, but as the mazes have walls, no real need.
         //    if (xDir > 0 || yDir > 0 && curPoint.X + xDir < maze.Dimensions.X && curPoint.Y + yDir < maze.Dimensions.Y)
          //   {
                 character = maze.Map[curPoint.X + xDir, curPoint.Y + yDir];
@@ -84,6 +85,10 @@ namespace MazeSolver
                             break;
                         case "#":
                             Console.ForegroundColor = ConsoleColor.DarkRed;
+                            break;
+                        case ".":
+                            //hiding these by making them the same as the background.
+                            Console.ForegroundColor = ConsoleColor.Black;
                             break;
                         default:
                             Console.ForegroundColor = ConsoleColor.White;
@@ -110,25 +115,31 @@ namespace MazeSolver
             Stack<Point> path = new Stack<Point>();
             while (true)
             {
-
+                
                 bool canMoveRight = CanMove(curPoint, maze, 1);
                 bool canMoveDown = CanMove(curPoint, maze, 0, 1);
                 bool canMoveLeft = CanMove(curPoint, maze, -1);
                 bool canMoveUp = CanMove(curPoint, maze, 0, -1);
 
+                //if there is more than one direction we could go in, save this point so
+                //it can be easily backtracked to later
                 if ((canMoveRight ? 1 : 0) + (canMoveDown ? 1 : 0) +
                    (canMoveLeft ? 1 : 0) + (canMoveUp ? 1 : 0) > 1)
                 {
                     decisionPoints.Push(new Point() { X = curPoint.X, Y = curPoint.Y });
                 }
 
+                //if we hit a dead-end or go in circles, backtrack
                 if (!canMoveRight && !canMoveDown && !canMoveLeft && !canMoveUp)
                 {
                     Point lastDecisionPoint = decisionPoints.Pop();
-                    
-                    while (!(curPoint.X == lastDecisionPoint.X && curPoint.Y == lastDecisionPoint.Y))
+                    maze.Map[curPoint.X, curPoint.Y] = ".";
+
+                    while (true)
                     {
                         curPoint = path.Pop();
+                        if (curPoint.X == lastDecisionPoint.X && curPoint.Y == lastDecisionPoint.Y)
+                            break;
                         maze.Map[curPoint.X, curPoint.Y] = ".";
                     }
                     continue;
@@ -136,6 +147,7 @@ namespace MazeSolver
 
                 path.Push(new Point() { X = curPoint.X, Y = curPoint.Y });
 
+                //actually move
                 if (canMoveRight)
                     curPoint.X++;
                 else if (canMoveDown)
@@ -144,9 +156,13 @@ namespace MazeSolver
                     curPoint.X--;
                 else if (canMoveUp)
                     curPoint.Y--;
-                RenderMaze(maze);
+
                 if (maze.Map[curPoint.X, curPoint.Y] == "E")
+                {
+                    RenderMaze(maze);
                     break;
+
+                }
                 maze.Map[curPoint.X, curPoint.Y] = "X";
 
           
@@ -159,17 +175,24 @@ namespace MazeSolver
 
     class Program
     {
-
-
-
         static void Main(string[] args)
         {
             MazeSolver mazeSolver = new MazeSolver();
-            mazeSolver.SolveMaze("Mazes/medium_input.txt");
 
-            while (true) { }
+            string input = "";
 
+            while (input != "exit")
+            {
+                Console.ForegroundColor = ConsoleColor.White;
+                Console.WriteLine("Enter file path or type 'exit': ");
+                input = Console.ReadLine();
 
+                if (input != "exit" && File.Exists(input))
+                {
+                    mazeSolver.SolveMaze(input);
+                }
+
+            }
         }
 
 
