@@ -37,20 +37,20 @@ namespace MazeSolver
             for (int i = 3; i < input.Length; i++)
             {
                 string[] line = input[i].Split(' ');
-                for (int j = 0; j < line.Length; j++)
+                for (int mapX = 0; mapX < line.Length; mapX++)
                 {
-                    string c = line[j];
-                    int mapX = i - 3;
+                    string c = line[mapX];
+                    int mapY = i - 3;
 
                     if (c == "1")
-                        map[mapX, j] = "#";
+                        map[mapX, mapY] = "#";
                     else if (c == "0")
-                        map[mapX, j] = " ";
+                        map[mapX, mapY] = " ";
 
-                    if (mapX == start.X && j == start.Y)
-                        map[mapX, j] = "S";
-                    else if (mapX == end.X && j == end.Y)
-                        map[mapX, j] = "E";
+                    if (mapX == start.X && mapY == start.Y)
+                        map[mapX, mapY] = "S";
+                    else if (mapX == end.X && mapY == end.Y)
+                        map[mapX, mapY] = "E";
                 }
             }
 
@@ -60,12 +60,13 @@ namespace MazeSolver
         public bool CanMove(Point curPoint, Maze maze, int xDir = 0, int yDir = 0)
         {
             string character = "";
-            if (xDir > 0 || yDir > 0 && curPoint.X + xDir < maze.Dimensions.X && curPoint.Y + yDir < maze.Dimensions.Y)
-            {
+        //    if (xDir > 0 || yDir > 0 && curPoint.X + xDir < maze.Dimensions.X && curPoint.Y + yDir < maze.Dimensions.Y)
+         //   {
                 character = maze.Map[curPoint.X + xDir, curPoint.Y + yDir];
-            }
+           // }
+          //  else if (xDir < 0 || yDir < 0 && curPoint.X + )
 
-            if (character == " ")
+            if (character == " " || character == "E")
                 return true;
             return false;
         }
@@ -79,8 +80,23 @@ namespace MazeSolver
             List<Point> decisionPoints = new List<Point>();
             while (true)
             {
-                bool canMoveRight = CanMove(curPoint, maze, 1);
 
+                bool canMoveRight = CanMove(curPoint, maze, 1);
+                bool canMoveDown = CanMove(curPoint, maze, 0, 1);
+                bool canMoveLeft = CanMove(curPoint, maze, -1);
+                bool canMoveUp = CanMove(curPoint, maze, 0, -1);
+
+                if (canMoveRight)
+                    curPoint.X++;
+                else if (canMoveDown)
+                    curPoint.Y++;
+                else if (canMoveLeft)
+                    curPoint.X--;
+                else if (canMoveUp)
+                    curPoint.Y--;
+
+                if (maze.Map[curPoint.X, curPoint.Y] == "E")
+                    break;
 
             }
 
