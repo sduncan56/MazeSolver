@@ -105,7 +105,7 @@ namespace MazeSolver
 
         }
 
-        public void SolveMaze(string filename)
+        public Maze SolveMaze(string filename)
         {
             Maze maze = ParseFile(filename);
 
@@ -132,6 +132,8 @@ namespace MazeSolver
                 //if we hit a dead-end or go in circles, backtrack
                 if (!canMoveRight && !canMoveDown && !canMoveLeft && !canMoveUp)
                 {
+                    if (decisionPoints.Count == 0)
+                        return null;
                     Point lastDecisionPoint = decisionPoints.Pop();
                     maze.Map[curPoint.X, curPoint.Y] = ".";
 
@@ -159,8 +161,9 @@ namespace MazeSolver
 
                 if (maze.Map[curPoint.X, curPoint.Y] == "E")
                 {
-                    RenderMaze(maze);
-                    break;
+                    return maze;
+                   // RenderMaze(maze);
+                   // break;
 
                 }
                 maze.Map[curPoint.X, curPoint.Y] = "X";
@@ -189,7 +192,12 @@ namespace MazeSolver
 
                 if (input != "exit" && File.Exists(input))
                 {
-                    mazeSolver.SolveMaze(input);
+                    Maze maze = mazeSolver.SolveMaze(input);
+
+                    if (maze == null)
+                        Console.WriteLine("This maze is unsolvable");
+                    else
+                        mazeSolver.RenderMaze(maze);
                 }
 
             }
